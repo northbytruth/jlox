@@ -9,6 +9,15 @@ import com.craftinginterpreters.lox.Expr.Unary;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
+    private Environment environment = new Environment();
+
+    @Override
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
+        environment.assign(expr.name, value);
+        return value;
+    }
+
     @Override
     public Object visitBinaryExpr(Binary expr) {
         Object left = evaluate(expr.left);
@@ -72,12 +81,29 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 checkNumberOperand(expr.operator, right);
                 return -(double)right;
             case BANG:
-				return !isTruthy(right);
-			case BANG_EQUAL:
-				break;
+                return !isTruthy(right);
+            case BANG_EQUAL:
+                break;
         }
 
         return null;
+    }
+
+
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        Object value = null;
+        if (stmt.initializer != null){
+            value=evaluate(stmt.initializer);
+        }
+
+        environment.define(stmt.name.lexeme,value);
+        return null;
+    }
+
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+     return environment.get(expr.name);
     }
 
     private Object evaluate(Expr expr) {
@@ -132,6 +158,12 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         evaluate(stmt.expression);
         return null;
@@ -142,6 +174,19 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object value = evaluate(stmt.expression);
         System.out.println(stringify(value));
         return null;
+    }
+
+    private void executeBlock(List<Stmt> statements, Environment environment){
+        Environment previous = this.environment;
+        try {
+            this.environment = environment;
+
+            for (Stmt statement : statements){
+                execute(statement);
+            }
+        } finally {
+            this.environment = previous;
+        }
     }
 
     private void execute(Stmt stmt) {
