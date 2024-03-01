@@ -14,3 +14,9 @@ generate:
 	@echo "Generate AST"
 	@javac com/craftinginterpreters/tool/*.java -d bin/class
 	@java -cp "bin/class" com.craftinginterpreters.tool.GenerateAst "com/craftinginterpreters/lox"
+
+# Example to run
+#DIR=./examples/fib.lox make runCode
+runCode:
+	@echo "Starting Interpreter"
+	@java -jar bin/Lox.jar $(DIR)

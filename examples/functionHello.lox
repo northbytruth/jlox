@@ -1,6 +1,10 @@
 
-fun sayHi(first, last){
+fun sayHiInner(first, last){
     print "Hi, " + first + " " + last + "!";
+}
+
+fun sayHi(first, last){
+    sayHiInner(first, last);
 }
 
 sayHi("Dear", "Reader");
