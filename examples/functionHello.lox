@@ -8,3 +8,15 @@ fun sayHi(first, last){
 }
 
 sayHi("Dear", "Reader");
+
+class TESTME {
+    serveXXX(){
+        return "RECCCC";
+    }
+
+    prinTest(){
+        print "RECCCED";
+    }
+}
+
+print TESTME().prinTest();
